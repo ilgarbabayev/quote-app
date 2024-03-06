@@ -28,18 +28,18 @@ public class LoggingInterceptor implements ClientHttpRequestInterceptor {
 
    private void logRequest(HttpRequest request, byte[] body) {
       if (log.isDebugEnabled()) {
-         log.debug("===========================request begin================================================");
+         log.debug("=========================== request begin =====================================");
          log.debug("URI         : {}", request.getURI());
          log.debug("Method      : {}", request.getMethod());
          log.debug("Headers     : {}", request.getHeaders());
          log.debug("Request body: {}", new String(body, StandardCharsets.UTF_8));
-         log.debug("==========================request end================================================");
+         log.debug("===========================request end =====================================");
       }
    }
 
    private void logResponse(ClientHttpResponse response) throws IOException {
       if (log.isDebugEnabled()) {
-         log.debug("============================response begin==========================================");
+         log.debug("=========================== response begin =====================================");
          log.debug("Status code  : {}", response.getStatusCode());
          log.debug("Status text  : {}", response.getStatusText());
          log.debug("Headers      : {}", response.getHeaders());
@@ -48,7 +48,7 @@ public class LoggingInterceptor implements ClientHttpRequestInterceptor {
                .lines()
                .collect(Collectors.joining("\n"));
          log.debug("Response body: {}", body);
-         log.debug("=======================response end=================================================");
+         log.debug("=========================== response end ======================================");
          log.debug("");
       }
    }

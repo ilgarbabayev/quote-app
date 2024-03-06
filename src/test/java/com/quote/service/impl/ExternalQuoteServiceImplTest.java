@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClient;
@@ -25,6 +26,9 @@ import org.springframework.web.client.RestClient;
 })
 @SpringBootTest
 class ExternalQuoteServiceImplTest {
+
+   @Autowired
+   ObjectMapper objectMapper;
 
    @InjectWireMock("external-service")
    private WireMockServer wiremock;
@@ -69,14 +73,14 @@ class ExternalQuoteServiceImplTest {
    }
 
    private QuoteDto getQuoteDto() {
-      QuoteDto quoteDto = new QuoteDto();
-      quoteDto.setAuthor("Some Author");
-      quoteDto.setContent("Quote Content");
-      quoteDto.setId("someId");
-      quoteDto.setTags(Set.of("tag1", "tag2"));
-      quoteDto.setAuthorSlug("some-author");
 
-      return quoteDto;
+      return QuoteDto.builder()
+            .author("Some Author")
+            .content("Quote Content")
+            .id("someId")
+            .tags(Set.of("tag1", "tag2"))
+            .authorSlug("some-author")
+            .build();
    }
 
    private String getQuoteDtoString() {
@@ -100,13 +104,13 @@ class ExternalQuoteServiceImplTest {
    }
 
    private String getRandomQuoteWrapperDtoString() {
-      ObjectMapper objectMapper = new ObjectMapper();
 
-      QuoteDtoWrapper quoteDtoWrapper = new QuoteDtoWrapper();
-      quoteDtoWrapper.setResults(List.of(getQuoteDto()));
+      QuoteDtoWrapper wrapper = QuoteDtoWrapper.builder()
+            .results(List.of(getQuoteDto()))
+            .build();
 
       try {
-         return objectMapper.writeValueAsString(quoteDtoWrapper);
+         return objectMapper.writeValueAsString(wrapper);
       } catch (JsonProcessingException e) {
          throw new RuntimeException(e);
       }

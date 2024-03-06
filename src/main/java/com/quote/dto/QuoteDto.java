@@ -2,18 +2,21 @@ package com.quote.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import java.util.Set;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Singular;
+import lombok.Value;
 
-@Data
-
+@Value
+@Builder(toBuilder = true)
 public class QuoteDto {
 
    @JsonAlias("_id")
-   private String id;
-   private String content;
-   private String author;
-   private String authorSlug;
-   private Set<String> tags;
-   private Long rate;
+   String id;
+   String content;
+   String author;
+   String authorSlug;
+   @Singular
+   Set<String> tags;
+   Long rate;
 
 }

@@ -54,8 +54,7 @@ public class QuoteManagerImpl implements QuoteManager {
       QuoteDtoWrapper response = externalQuoteService.findQuotesByFilter(author, tags, limit);
 
       if (Objects.nonNull(response) && !CollectionUtils.isEmpty(response.getResults())) {
-         List<QuoteDto> results = response.getResults();
-         rateManager.appendRateData(results);
+         List<QuoteDto> results = rateManager.appendRateData(response.getResults());
          return Pair.of(results, SUCCESS_MESSAGE);
       } else {
          log.info(QUOTES_NOT_FOUND_MESSAGE);
@@ -78,8 +77,8 @@ public class QuoteManagerImpl implements QuoteManager {
          QuoteDto quoteDto = externalQuoteService.findQuoteById(quoteId);
 
          if (Objects.nonNull(quoteDto)) {
-            rateManager.appendRateData(quoteDto);
-            return Pair.of(quoteDto, SUCCESS_MESSAGE);
+            QuoteDto updated = rateManager.appendRateData(quoteDto);
+            return Pair.of(updated, SUCCESS_MESSAGE);
          }
       }
       return getRandomQuote();
@@ -101,17 +100,16 @@ public class QuoteManagerImpl implements QuoteManager {
          quoteDto = response.get(0);
          msg = SUCCESS_MESSAGE;
       }
-      rateManager.appendRateData(quoteDto);
+      QuoteDto updated = rateManager.appendRateData(quoteDto);
 
-      return Pair.of(quoteDto, msg);
+      return Pair.of(updated, msg);
    }
 
    private Pair<QuoteDto, String> fallbackQuotes(Throwable e) {
       log.error(EXTERNAL_RESOURCE_ERROR_MESSAGE, e);
       log.info("Getting Quote from Local source");
-      QuoteDto quoteDto = getRandomQuoteFromLocalResource();
-      rateManager.appendRateData(quoteDto);
-      return Pair.of(quoteDto, ALTERNATIVE_QUOTE_MESSAGE);
+      QuoteDto updated = rateManager.appendRateData(getRandomQuoteFromLocalResource());
+      return Pair.of(updated, ALTERNATIVE_QUOTE_MESSAGE);
    }
 
    private QuoteDto getRandomQuoteFromLocalResource() {

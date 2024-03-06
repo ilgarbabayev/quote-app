@@ -10,9 +10,9 @@ public interface RateManager {
 
    void fillQuoteRate();
 
-   void appendRateData(QuoteDto quoteDto);
+   QuoteDto appendRateData(QuoteDto quoteDto);
 
-   void appendRateData(List<QuoteDto> quoteDtoList);
+   List<QuoteDto> appendRateData(List<QuoteDto> quoteDtoList);
 
    Optional<String> getRandomQuoteRateFromTop50();
 }

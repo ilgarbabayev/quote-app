@@ -80,24 +80,22 @@ class RateManagerImplTest {
 
    @Test
    void appendRateData_should_add_rate_to_quote_from_db() {
-      QuoteDto quoteDto = new QuoteDto();
-      quoteDto.setId("1");
+      QuoteDto quoteDto = QuoteDto.builder().id("1").build();
       QuoteRate quoteRate = getQuoteRate();
       when(quoteRateRepository.findById(quoteDto.getId())).thenReturn(Optional.of(quoteRate));
 
-      rateManager.appendRateData(quoteDto);
+      QuoteDto respond = rateManager.appendRateData(quoteDto);
 
-      assertEquals(quoteRate.getRate(), quoteDto.getRate());
+      assertEquals(quoteRate.getRate(), respond.getRate());
    }
 
    @Test
    void appendRateData_should_set_rate_to_zero() {
-      QuoteDto quoteDto = new QuoteDto();
-      quoteDto.setId("1");
+      QuoteDto quoteDto = QuoteDto.builder().id("1").build();
 
-      rateManager.appendRateData(quoteDto);
+      QuoteDto respond = rateManager.appendRateData(quoteDto);
 
-      assertEquals(0L, quoteDto.getRate());
+      assertEquals(0L, respond.getRate());
    }
 
    @Test
@@ -108,11 +106,11 @@ class RateManagerImplTest {
 
       when(quoteRateRepository.findAllByQuoteIdIn(quoteIds)).thenReturn(quoteRates);
 
-      rateManager.appendRateData(quoteDtos);
+      List<QuoteDto> quoteDtoRespond = rateManager.appendRateData(quoteDtos);
 
-      assertEquals(1L, quoteDtos.get(0).getRate());
-      assertEquals(2L, quoteDtos.get(1).getRate());
-      assertEquals(3L, quoteDtos.get(2).getRate());
+      assertEquals(1L, quoteDtoRespond.get(0).getRate());
+      assertEquals(2L, quoteDtoRespond.get(1).getRate());
+      assertEquals(3L, quoteDtoRespond.get(2).getRate());
    }
 
    @Test
@@ -121,6 +119,8 @@ class RateManagerImplTest {
       when(quoteRateRepository.findTop50ByOrderByRateDesc()).thenReturn(quoteRates);
 
       Optional<String> quoteId = rateManager.getRandomQuoteRateFromTop50();
+
+      assertTrue(quoteId.isPresent());
 
       Optional<QuoteRate> first = quoteRates.stream().filter(rate -> rate.getQuoteId().equals(quoteId.get())).findFirst();
 
@@ -140,12 +140,9 @@ class RateManagerImplTest {
 
 
    private List<QuoteDto> getQuoteDtos() {
-      QuoteDto quoteDto1 = new QuoteDto();
-      quoteDto1.setId("1");
-      QuoteDto quoteDto2 = new QuoteDto();
-      quoteDto2.setId("2");
-      QuoteDto quoteDto3 = new QuoteDto();
-      quoteDto3.setId("3");
+      QuoteDto quoteDto1 = QuoteDto.builder().id("1").build();
+      QuoteDto quoteDto2 = QuoteDto.builder().id("2").build();
+      QuoteDto quoteDto3 = QuoteDto.builder().id("3").build();
 
       return List.of(quoteDto1, quoteDto2, quoteDto3);
    }

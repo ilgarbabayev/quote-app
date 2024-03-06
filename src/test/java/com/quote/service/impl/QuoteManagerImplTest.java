@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import com.quote.dto.QuoteDto;
 import com.quote.dto.QuoteDtoWrapper;
-import com.quote.entity.QuoteRate;
 import com.quote.repository.QuoteRepository;
 import com.quote.service.ExternalQuoteService;
 import com.quote.service.RateManager;
@@ -35,7 +34,6 @@ class QuoteManagerImplTest {
    private QuoteManagerImpl quoteManager;
 
 
-
    @Test
    void getRandomQuote_should_return_prioritized_quote() {
       Optional<String> quoteId = Optional.of("someId");
@@ -43,6 +41,7 @@ class QuoteManagerImplTest {
 
       when(rateManager.getRandomQuoteRateFromTop50()).thenReturn(quoteId);
       when(externalQuoteService.findQuoteById(quoteId.get())).thenReturn(quoteDto);
+      when(rateManager.appendRateData(quoteDto)).thenReturn(quoteDto);
 
       Pair<QuoteDto, String> actual = quoteManager.getRandomQuote(true);
 
@@ -57,6 +56,7 @@ class QuoteManagerImplTest {
 
       when(rateManager.getRandomQuoteRateFromTop50()).thenReturn(quoteId);
       when(externalQuoteService.getRandomQuotes()).thenReturn(List.of(quoteDto));
+      when(rateManager.appendRateData(quoteDto)).thenReturn(quoteDto);
       Pair<QuoteDto, String> actual = quoteManager.getRandomQuote(true);
 
       assertEquals("Success", actual.getRight());
@@ -68,6 +68,8 @@ class QuoteManagerImplTest {
       QuoteDto quoteDto = getQuoteDto();
 
       when(externalQuoteService.getRandomQuotes()).thenReturn(List.of(quoteDto));
+      when(rateManager.appendRateData(quoteDto)).thenReturn(quoteDto);
+
       Pair<QuoteDto, String> actual = quoteManager.getRandomQuote(false);
 
       assertEquals("Success", actual.getRight());
@@ -79,6 +81,8 @@ class QuoteManagerImplTest {
       QuoteDto quoteDto = getQuoteDto();
 
       when(quoteRepository.getAllQuotes()).thenReturn(List.of(quoteDto));
+      when(rateManager.appendRateData(quoteDto)).thenReturn(quoteDto);
+
       Pair<QuoteDto, String> actual = quoteManager.getRandomQuote(false);
 
       assertEquals("Alternative Quote", actual.getRight());
@@ -102,6 +106,7 @@ class QuoteManagerImplTest {
       QuoteDtoWrapper quoteDtoWrapper = getQuoteDtoWrapper();
 
       when(externalQuoteService.findQuotesByFilter(author, tags, limit)).thenReturn(quoteDtoWrapper);
+      when(rateManager.appendRateData(quoteDtoWrapper.getResults())).thenReturn(quoteDtoWrapper.getResults());
       Pair<List<QuoteDto>, String> actual = quoteManager.findQuotes(author, tags, limit);
 
       assertEquals("Success", actual.getRight());
@@ -109,7 +114,7 @@ class QuoteManagerImplTest {
    }
 
    @Test
-   void findQuotes_should_not_any_return_when_not_find_by_filter() {
+   void findQuotes_should_not_return_any_when_not_find_by_filter() {
       var author = "author";
       var tags = "tag";
       var limit = 10;
@@ -121,20 +126,18 @@ class QuoteManagerImplTest {
    }
 
    private QuoteDto getQuoteDto() {
-      QuoteDto quoteDto = new QuoteDto();
-      quoteDto.setAuthor("Some Author");
-      quoteDto.setContent("Quote Content");
-      quoteDto.setId("someId");
-      quoteDto.setTags(Set.of("tag1", "tag2"));
-      quoteDto.setAuthorSlug("some-author");
-
-      return quoteDto;
+      return QuoteDto.builder()
+            .author("Some Author")
+            .content("Quote Content")
+            .id("someId")
+            .tags(Set.of("tag1", "tag2"))
+            .authorSlug("some-author")
+            .build();
    }
 
    private QuoteDtoWrapper getQuoteDtoWrapper() {
-      QuoteDtoWrapper quoteDtoWrapper = new QuoteDtoWrapper();
-      quoteDtoWrapper.setResults(List.of(getQuoteDto()));
-
-      return quoteDtoWrapper;
+      return QuoteDtoWrapper.builder()
+            .results(List.of(getQuoteDto()))
+            .build();
    }
 }

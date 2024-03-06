@@ -5,6 +5,8 @@ import com.quote.entity.QuoteRate;
 import com.quote.repository.QuoteRateRepository;
 import com.quote.repository.QuoteRepository;
 import com.quote.service.RateManager;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,31 +56,39 @@ public class RateManagerImpl implements RateManager {
    }
 
    @Override
-   public void appendRateData(QuoteDto quoteDto) {
-      log.info("Getting quote rate data for Quote ID: {}" , quoteDto.getId());
+   public QuoteDto appendRateData(QuoteDto quoteDto) {
+      if (Objects.isNull(quoteDto)) {
+         return null;
+      }
+      log.info("Getting quote rate data for Quote ID: {}", quoteDto.getId());
       Optional<QuoteRate> rate = quoteRateRepository.findById(quoteDto.getId());
+
       if (rate.isPresent()) {
-         quoteDto.setRate(rate.get().getRate());
+         return quoteDto.toBuilder().rate(rate.get().getRate()).build();
       } else {
-         quoteDto.setRate(0L);
+         return quoteDto.toBuilder().rate(0L).build();
       }
    }
 
    @Override
-   public void appendRateData(List<QuoteDto> quoteDtoList) {
-      log.info("Getting quote rate data for Quotes size {}" , quoteDtoList.size());
+   public List<QuoteDto> appendRateData(List<QuoteDto> quoteDtoList) {
+      if (CollectionUtils.isEmpty(quoteDtoList)) {
+         return Collections.emptyList();
+      }
+      log.info("Getting quote rate data for Quotes size {}", quoteDtoList.size());
       Set<String> quoteIds = quoteDtoList.stream().map(QuoteDto::getId).collect(Collectors.toSet());
       Map<String, QuoteRate> rateMap = quoteRateRepository.findAllByQuoteIdIn(quoteIds).stream()
             .collect(Collectors.toMap(QuoteRate::getQuoteId, Function.identity()));
 
-      quoteDtoList.forEach(quoteDto -> {
-         QuoteRate rate = rateMap.get(quoteDto.getId());
-         if (Objects.nonNull(rate)) {
-            quoteDto.setRate(rate.getRate());
-         } else {
-            quoteDto.setRate(0L);
-         }
-      });
+      return quoteDtoList.stream()
+            .map(quoteDto -> {
+               QuoteRate rate = rateMap.get(quoteDto.getId());
+               if (Objects.nonNull(rate)) {
+                  return quoteDto.toBuilder().rate(rate.getRate()).build();
+               } else {
+                  return quoteDto.toBuilder().rate(0L).build();
+               }
+            }).toList();
    }
 
    @Override
